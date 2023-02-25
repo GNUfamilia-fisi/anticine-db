@@ -8,6 +8,8 @@ const SERVER_ADDRESS: &str = "127.0.0.1:7878";
 
 fn main() {
     let listener = TcpListener::bind(SERVER_ADDRESS).unwrap();
+
+    println!("listening for connections at {}", SERVER_ADDRESS);
     // In memory database
     let mut database: HashMap<String, String> = HashMap::new();
 
