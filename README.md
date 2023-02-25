@@ -1,8 +1,6 @@
 <p align="center">
   <h3 align="center">
-    <code>
       anticine-db
-    </code>
   </h3>
   <p align="center">
     Self-hosted key/value database for <a src="https://github.com/GNUfamilia-fisi/anticine">anticine</a>
