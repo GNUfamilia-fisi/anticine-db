@@ -16,10 +16,30 @@ const OPTIONS = {
   port: DATABASE_PORT,
 };
 
+const SESSION = {
+  id: 0,
+  columns: [{
+    name: 'a',
+    num: '1',
+    seats: [
+      {
+        id: 0,
+        name: 'id'
+      },
+      {
+        id: 1,
+        name: 'some\n\ndata\ntest'
+      }
+    ]
+  }]
+}
+
+const TO_WRITE = `SET sessions.123123 ${JSON.stringify(SESSION)}`;
+
 client.connect(OPTIONS);
 
 input.on('line', (line) => {
-  if (!client.write(`${line}\n`)) {
+  if (!client.write(`${line}`)) {
     console.log('failed to write to socket');
   }
 });
