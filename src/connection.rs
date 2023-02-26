@@ -5,7 +5,7 @@ use std::{
 };
 
 pub fn handle_connection(mut stream: &TcpStream, db: &mut Database) -> std::io::Result<()> {
-    stream.set_nonblocking(true).expect("Failed to set nonblocking stream");
+    stream.set_nonblocking(true)?;
     let mut still_connected = true;
 
     while still_connected {
@@ -30,7 +30,7 @@ pub fn handle_connection(mut stream: &TcpStream, db: &mut Database) -> std::io::
                     break;
                 },
                 Err(_) => {
-                    panic!("failed to read from stream");
+                    return Err(std::io::Error::new(std::io::ErrorKind::Other, "Error reading from socket"));
                 }
             }
         }
@@ -38,7 +38,7 @@ pub fn handle_connection(mut stream: &TcpStream, db: &mut Database) -> std::io::
             continue;
         }
 
-        let contents = String::from_utf8(result).unwrap();
+        let contents = String::from_utf8_lossy(&result);
         println!("finished reaing contents: {}", contents.len());
 
         let mut iter = contents.split_ascii_whitespace();
@@ -50,8 +50,12 @@ pub fn handle_connection(mut stream: &TcpStream, db: &mut Database) -> std::io::
 
         match method {
             "GET" => {
-                let value = db.get_key(key).unwrap();
-                let _ = stream.write(value.as_bytes()).unwrap();
+                if let Ok(value) = db.get_key(key) {
+                    let _ = stream.write(value.as_bytes()).unwrap();
+                }
+                else {
+                    let _ = stream.write(b"Key not found").unwrap();
+                }
             },
             "SET" => {
                 db.set_key(key, value);

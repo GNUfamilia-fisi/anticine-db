@@ -28,7 +28,9 @@ fn main() {
             Ok(stream) => {
                 let addr = stream.peer_addr().unwrap();
                 println!("Connection from {}", addr);
-                handle_connection(&stream, &mut database).unwrap();
+                handle_connection(&stream, &mut database).unwrap_or_else(|e| {
+                    eprintln!("Failed to handle connection: {}", e);
+                });
             },
             Err(e) => {
                 eprintln!("Failed to connect to socket {}", e);

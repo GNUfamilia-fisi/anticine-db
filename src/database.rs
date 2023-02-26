@@ -1,5 +1,8 @@
 use std::collections::HashMap;
 
+#[derive(Debug)]
+pub struct KeyNotFound;
+
 pub struct Database {
     pub data_map: HashMap<String, String>,
     pub filename: &'static str
@@ -17,7 +20,7 @@ impl Database {
         self.write(format!("{} {}", key, value).as_str()).unwrap();
     }
 
-    pub fn get_key(&self, key: &str) -> Result<String, String> {
+    pub fn get_key(&self, key: &str) -> Result<String, KeyNotFound> {
         println!("getting {}", key);
         match self.data_map.get(key) {
             Some(value) => {
@@ -26,7 +29,7 @@ impl Database {
             },
             None => {
                 println!("key not found");
-                Err("key not found".to_string())
+                Err(KeyNotFound)
             }
         }
     }
