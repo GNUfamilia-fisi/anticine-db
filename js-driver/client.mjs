@@ -39,6 +39,12 @@ const TO_WRITE = `SET sessions.123123 ${JSON.stringify(SESSION)}`;
 client.connect(OPTIONS);
 
 input.on('line', (line) => {
+  if (line === 'test') {
+    client.write(TO_WRITE);
+    console.log(`sent: ${TO_WRITE}`);
+    return;
+  }
+
   if (!client.write(`${line}`)) {
     console.log('failed to write to socket');
   }
