@@ -54,7 +54,7 @@ pub fn handle_connection(mut stream: &TcpStream, db: &mut Database) -> std::io::
                     let _ = stream.write(value.as_bytes()).unwrap();
                 }
                 else {
-                    let _ = stream.write(b"Key not found").unwrap();
+                    let _ = stream.write(b"not found").unwrap();
                 }
             },
             "SET" => {
