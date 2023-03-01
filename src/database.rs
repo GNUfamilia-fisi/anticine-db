@@ -5,6 +5,36 @@ use std::io::{Read, Write};
 #[derive(Debug)]
 pub struct KeyNotFound;
 
+#[derive(Debug)]
+pub struct KeyAlreadyExists;
+
+#[derive(Debug)]
+pub struct MalformedJson;
+
+pub enum DatabaseError {
+    KeyNotFound,
+    KeyAlreadyExists,
+    MalformedJson
+}
+
+impl From<KeyNotFound> for DatabaseError {
+    fn from(_: KeyNotFound) -> Self {
+        DatabaseError::KeyNotFound
+    }
+}
+
+impl From<KeyAlreadyExists> for DatabaseError {
+    fn from(_: KeyAlreadyExists) -> Self {
+        DatabaseError::KeyAlreadyExists
+    }
+}
+
+impl From<MalformedJson> for DatabaseError {
+    fn from(_: MalformedJson) -> Self {
+        DatabaseError::MalformedJson
+    }
+}
+
 pub struct Database {
     pub data_map: HashMap<String, json::JsonValue>,
     pub filename: &'static str
@@ -34,10 +64,10 @@ impl Database {
         contents.split('\n').for_each(|line| {
             let mut iter = line.split_ascii_whitespace();
             let key = iter.next().unwrap_or("");
-            let value = iter.next().unwrap_or("");
+            let value = iter.collect::<Vec<&str>>().join(" ");
 
             if !key.is_empty() && !value.is_empty() {
-                self.data_map.insert(key.to_string(), json::parse(value).unwrap());
+                self.data_map.insert(key.to_string(), json::parse(value.as_str()).unwrap());
             }
             else {
                 // bad line, ignore
@@ -46,15 +76,16 @@ impl Database {
         Ok(())
     }
 
-    // TODO: this function should return a Result
-    pub fn set_key(&mut self, key: &str, value: &str) {
-        match json::parse(value) {
+    pub fn set_key(&mut self, key: &str, value: String) -> Result<(), DatabaseError> {
+        if !self.data_map.get(key).is_none() {
+            return Err(KeyAlreadyExists.into());
+        }
+        match json::parse(value.as_str()) {
             Ok(parsed) => {
-                println!("setting {} as {}", key, value);
+                // println!("setting {} as {}", key, value);
                 let mut value = parsed.dump();
                 value.push('\n');
                 let to_write = format!("{} {}", key, value);
-
                 // save json to memory
                 self.data_map.insert(key.to_string(), parsed);
                 // save json to file
@@ -64,19 +95,21 @@ impl Database {
             },
             Err(e) => {
                 println!("error parsing json: {}", e);
+                return Err(MalformedJson.into());
             }
         }
+        Ok(())
     }
 
     pub fn get_key(&self, key: &str) -> Result<String, KeyNotFound> {
         println!("getting {}", key);
         match self.data_map.get(key) {
             Some(value) => {
-                println!("value: {}", value);
+                println!(" -> OK");
                 Ok(value.dump())
             },
             None => {
-                println!("key not found");
+                println!(" -> NOT FOUND");
                 Err(KeyNotFound)
             }
         }
