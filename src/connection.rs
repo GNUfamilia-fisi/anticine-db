@@ -39,7 +39,7 @@ pub fn handle_connection(mut stream: &TcpStream, db: &mut Database) -> std::io::
         }
 
         let contents = String::from_utf8_lossy(&result);
-        println!("finished reaing contents: {}", contents.len());
+        println!("finished reading contents: {}", contents.len());
 
         // This content can be merged with other contents of separate requests
         // so we need to split it into separate requests by '\r\n'
@@ -50,8 +50,7 @@ pub fn handle_connection(mut stream: &TcpStream, db: &mut Database) -> std::io::
             if request.is_empty() {
                 continue;
             }
-            // print first 20 characters
-            println!("request: {}", &request.chars().take(21).collect::<String>());
+            println!("request: {}", request);
             // Unpack request
             let mut iter = request.split_ascii_whitespace();
 
@@ -72,9 +71,6 @@ pub fn handle_connection(mut stream: &TcpStream, db: &mut Database) -> std::io::
                     // can throw KeyAlreadyExists and MalformedJson derived from DatabaseError
                     if let Err(e) = db.set_key(key, value) {
                         match e {
-                            DatabaseError::KeyAlreadyExists => {
-                                stream.write(b"already exists").unwrap();
-                            },
                             DatabaseError::MalformedJson => {
                                 stream.write(b"malformed json").unwrap();
                             },
