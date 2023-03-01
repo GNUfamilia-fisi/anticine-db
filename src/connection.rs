@@ -17,7 +17,7 @@ pub fn handle_connection(mut stream: &TcpStream, db: &mut Database) -> std::io::
             // Read the request
             match stream_reader.read(&mut buff) {
                 Ok(n) if n > 0 => {
-                    // println!("read {} bytes", n);
+                    println!("read {} bytes", n);
                     result.extend_from_slice(&buff[..n]);
                 },
                 Ok(_) => {
@@ -26,7 +26,7 @@ pub fn handle_connection(mut stream: &TcpStream, db: &mut Database) -> std::io::
                     break;
                 },
                 Err(e) if e.kind() == std::io::ErrorKind::WouldBlock => {
-                    // println!("no data available");
+                    // no data to read yet
                     break;
                 },
                 Err(_) => {

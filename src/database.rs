@@ -82,7 +82,6 @@ impl Database {
         }
         match json::parse(value.as_str()) {
             Ok(parsed) => {
-                // println!("setting {} as {}", key, value);
                 let mut value = parsed.dump();
                 value.push('\n');
                 let to_write = format!("{} {}", key, value);
