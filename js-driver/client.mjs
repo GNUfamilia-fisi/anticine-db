@@ -9,7 +9,7 @@ const input = readline.createInterface({
 
 const client = new net.Socket();
 
-const DATABASE_PORT = 7878;
+const DATABASE_PORT = 7868;
 
 const OPTIONS = {
   host: '127.0.0.1',
@@ -36,7 +36,9 @@ const SESSION = {
 
 const TO_WRITE = `SET sessions.123123 ${JSON.stringify(SESSION)}`;
 
-client.connect(OPTIONS);
+client.connect(OPTIONS, () => {
+  console.log(`\nConectado existosamente a la Anticine-db\n`);
+});
 
 input.on('line', (line) => {
   if (line === 'test') {
@@ -51,7 +53,7 @@ input.on('line', (line) => {
 });
 
 client.on('data', (data) => {
-  console.log(`received: ${data.toString()}`);
+  console.log(`-> ${data.toString()}\n`);
 });
 
 client.on('close', (data) => {

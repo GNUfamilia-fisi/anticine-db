@@ -4,11 +4,9 @@ use database::Database;
 use connection::handle_connection;
 
 use std::collections::HashMap;
-use std::{
-    net::TcpListener,
-};
+use std::net::TcpListener;
 
-const SERVER_ADDRESS: &str = "127.0.0.1:7878";
+const SERVER_ADDRESS: &str = "127.0.0.1:7868";
 
 // TODO:
 // - error codes for
@@ -17,15 +15,17 @@ const SERVER_ADDRESS: &str = "127.0.0.1:7878";
 //   - invalid json
 
 fn main() {
+    std::process::Command::new("clear").status().unwrap();
+
     let listener = TcpListener::bind(SERVER_ADDRESS).unwrap_or_else(|e| {
         panic!("Failed to bind to socket {}: {}", SERVER_ADDRESS, e);
     });
 
-    println!("listening for connections at {}", SERVER_ADDRESS);
+    println!("Anticine database escuchando en {}", SERVER_ADDRESS);
 
     let mut database = { Database {
         data_map: HashMap::new(),
-        filename: "src/data.bin"
+        filename: "src/database"
     } };
 
     database.load().unwrap_or_else(|e| {
@@ -45,6 +45,6 @@ fn main() {
             Err(e) => {
                 eprintln!("Failed to connect to socket {}", e);
             }
-        }
-    }
+        };
+    };
 }

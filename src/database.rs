@@ -72,7 +72,7 @@ impl Database {
 
                 file.seek(SeekFrom::End(0))?;
                 file.write_all(line_to_write.as_bytes())?;
-                file.write(b"\n")?;
+                file.write_all(b"\n")?;
 
                 self.data_map.insert(key.to_string(), parsed_json.clone());
 
@@ -83,7 +83,7 @@ impl Database {
         }
 
         println!("key not found");
-        return Ok(false);
+        Ok(false)
     }
 
     pub fn load(&mut self) -> std::io::Result<()> {
@@ -132,18 +132,19 @@ impl Database {
                 return Err(MalformedJson.into());
             }
         };
+        println!(" -> ok");
         Ok(())
     }
 
     pub fn get_key(&self, key: &str) -> Result<String, KeyNotFound> {
-        println!("getting {}", key);
+        // println!("getting {}", key);
         match self.data_map.get(key) {
             Some(value) => {
-                println!(" -> OK");
+                println!(" -> ok");
                 Ok(value.dump())
             },
             None => {
-                println!(" -> NOT FOUND");
+                println!(" -> not found");
                 Err(KeyNotFound)
             }
         }

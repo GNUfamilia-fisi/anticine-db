@@ -17,7 +17,7 @@ pub fn handle_connection(mut stream: &TcpStream, db: &mut Database) -> std::io::
             // Read the request
             match stream_reader.read(&mut buff) {
                 Ok(n) if n > 0 => {
-                    println!("read {} bytes", n);
+                    // println!("read {} bytes", n);
                     result.extend_from_slice(&buff[..n]);
                 },
                 Ok(_) => {
@@ -39,7 +39,7 @@ pub fn handle_connection(mut stream: &TcpStream, db: &mut Database) -> std::io::
         }
 
         let contents = String::from_utf8_lossy(&result);
-        println!("finished reading contents: {}", contents.len());
+        // println!("finished reading contents: {}", contents.len());
 
         // This content can be merged with other contents of separate requests
         // so we need to split it into separate requests by '\r\n'
@@ -50,7 +50,7 @@ pub fn handle_connection(mut stream: &TcpStream, db: &mut Database) -> std::io::
             if request.is_empty() {
                 continue;
             }
-            println!("request: {}", request);
+            println!("\nrequest: {}", request);
             // Unpack request
             let mut iter = request.split_ascii_whitespace();
 
@@ -61,10 +61,10 @@ pub fn handle_connection(mut stream: &TcpStream, db: &mut Database) -> std::io::
             match method {
                 "GET" => {
                     if let Ok(value) = db.get_key(key) {
-                        stream.write(value.as_bytes()).unwrap();
+                        stream.write_all(value.as_bytes()).unwrap();
                     }
                     else {
-                        stream.write(b"not found").unwrap();
+                        stream.write_all(b"not found").unwrap();
                     }
                 },
                 "SET" => {
@@ -72,15 +72,15 @@ pub fn handle_connection(mut stream: &TcpStream, db: &mut Database) -> std::io::
                     if let Err(e) = db.set_key(key, value) {
                         match e {
                             DatabaseError::MalformedJson => {
-                                stream.write(b"malformed json").unwrap();
+                                stream.write_all(b"malformed value").unwrap();
                             },
                             _ => {
-                                stream.write(b"unknown error").unwrap();
+                                stream.write_all(b"unknown error").unwrap();
                             }
                         }
                     }
                     else {
-                        stream.write(b"ok").unwrap();
+                        stream.write_all(b"ok").unwrap();
                     }
                 }
                 _ => {
